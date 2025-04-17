@@ -30,6 +30,9 @@ jobs:
           run_install: true
           package_json_file: package.json
 
+      - name: Verify pnpm installation
+        run: pnpm --version
+
       - name: Install dependencies
         run: pnpm install
 
