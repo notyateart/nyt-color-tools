@@ -13,7 +13,6 @@
     "@tailwindcss/cli": "^4.1.4",
     "@tailwindcss/vite": "^4.1.4",
     "colorjs.io": "^0.5.2",
-    "tailwindcss": "^4.1.4",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0"
   },
@@ -21,8 +20,10 @@
     "@types/node": "^22.14.1",
     "@vitejs/plugin-vue": "^5.2.2",
     "@vue/tsconfig": "^0.7.0",
+    "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
     "postcss-cli": "^11.0.1",
+    "tailwindcss": "^4.1.4",
     "typescript": "~5.7.2",
     "vite": "^6.3.0",
     "vue-tsc": "^2.2.8"
