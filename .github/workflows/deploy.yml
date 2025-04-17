@@ -15,16 +15,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3.9.0
         with:
-          node-version: 22.14.0
-          cache: 'pnpm'
+          # Version Spec of the version to use. Examples: 12.x, 10.15.1, >=10.15.0.
+          node-version: 22.x
+          # Set this option if you want the action to check for the latest available version that satisfies the version spec.
+          check-latest: true
+          # Used to specify a package manager for caching in the default directory. Supported values: npm, yarn, pnpm.
+          cache: pnpm
+          # Used to specify the path to a dependency file: package-lock.json, yarn.lock, etc. Supports wildcards or a list of file names for caching multiple dependencies.
+          cache-dependency-path: package-lock.json
+          
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v2
+        # You may pin to the exact commit or the version.
+        # uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+        uses: pnpm/action-setup@v4.1.0
         with:
-          version: 10.8.1
+          # Version of pnpm to install
+          version: 10.x
+          # If specified, run `pnpm install`
+          run_install: true
+          # File path to the package.json to read "packageManager" configuration
+          package_json_file: package.json
+          # When set to true, @pnpm/exe, which is a Node.js bundled package, will be installed, enabling using pnpm without Node.js.
+          standalone: true
 
       - name: Install dependencies
         run: pnpm install
