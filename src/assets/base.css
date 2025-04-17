@@ -1,0 +1,70 @@
+/* src/assets/base.css */
+:root {
+    --font: 'Inter', sans-serif;
+  
+    /* Font Sizes & Weights */
+    --fs-4xl: 2.074rem;
+    --fw-4xl: 300;
+  
+    --fs-3xl: 1.728rem;
+    --fw-3xl: 340;
+  
+    --fs-2xl: 1.44rem;
+    --fw-2xl: 380;
+  
+    --fs-xl: 1.2rem;
+    --fw-xl: 420;
+  
+    --fs-l: 1rem;
+    --fw-l: 460;
+  
+    --fs-m: 0.833rem;
+    --fw-m: 500;
+  
+    --fs-s: 0.694rem;
+    --fw-s: 540;
+  
+    /* Color Palette */
+    --bg: #e7e8ee;
+    --layer: #eeeff4;
+    --element: #fcfdff;
+    --text: #282992c;
+    --text-muted: #54575e;
+  
+    --primary: #2698df;
+    --secondary: #897fe4;
+    --tertiary: #c069b9;
+  
+    --danger: #d86273;
+    --warning: #f1ac5f;
+    --success: #91d284;
+  
+    --invert: #424347;
+    --text-on-accent: #fcfdff;
+  
+    /* Shadows */
+    --shadow: 1px 1px 5px rgba(255, 255, 255, 0.25);
+    --shadow-inner: inset 1px 1px 5px rgba(255, 255, 255, 0.25);
+  }
+  
+  body {
+    font-family: var(--font);
+    font-size: var(--fs-l);
+    font-weight: var(--fw-l);
+    color: var(--text);
+    background-color: var(--bg);
+    margin: 0;
+    padding: 0;
+  }
+  
+  h1 { font-size: var(--fs-4xl); font-weight: var(--fw-4xl); }
+  h2 { font-size: var(--fs-3xl); font-weight: var(--fw-3xl); }
+  h3 { font-size: var(--fs-2xl); font-weight: var(--fw-2xl); }
+  h4 { font-size: var(--fs-xl); font-weight: var(--fw-xl); }
+  h5 { font-size: var(--fs-l); font-weight: var(--fw-l); }
+  p, span, a {
+    font-size: var(--fs-m);
+    font-weight: var(--fw-m);
+    color: var(--text-muted);
+  }
+  

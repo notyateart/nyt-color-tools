@@ -1,0 +1,39 @@
+:root {
+    /* === Font Family === */
+    --nyt-type-font-family: 'Inter', sans-serif;
+  
+    /* === Font Sizes === */
+    --nyt-type-display-lg-size: 2.074rem;
+    --nyt-type-display-md-size: 1.728rem;
+    --nyt-type-display-sm-size: 1.44rem;
+  
+    --nyt-type-headline-size: 1.2rem;
+    --nyt-type-body-lg-size: 1rem;
+    --nyt-type-body-md-size: 0.833rem;
+    --nyt-type-body-sm-size: 0.694rem;
+  
+    /* === Font Weights === */
+    --nyt-type-display-lg-weight: 300;
+    --nyt-type-display-md-weight: 340;
+    --nyt-type-display-sm-weight: 380;
+  
+    --nyt-type-headline-weight: 420;
+    --nyt-type-body-lg-weight: 460;
+    --nyt-type-body-md-weight: 500;
+    --nyt-type-body-sm-weight: 540;
+  
+    /* === Line Heights === */
+    --nyt-type-line-tight: 1.1;
+    --nyt-type-line-normal: 1.4;
+    --nyt-type-line-loose: 1.6;
+  
+    /* === Letter Spacing === */
+    --nyt-type-letter-tight: -0.01em;
+    --nyt-type-letter-normal: 0;
+    --nyt-type-letter-wide: 0.02em;
+  
+    /* === Text Transform (Casing) === */
+    --nyt-type-case-uppercase: uppercase;
+    --nyt-type-case-none: none;
+  }
+  
