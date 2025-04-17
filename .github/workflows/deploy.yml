@@ -12,7 +12,7 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -24,12 +24,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 8
+          version: 8 # or match your local version
 
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build project
+      - name: Build
         run: pnpm run build
 
       - name: Deploy to GitHub Pages
