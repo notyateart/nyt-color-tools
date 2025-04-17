@@ -47,7 +47,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Color from 'colorjs.io'
-import ColorInput from '@/components/ColorInput.vue'
+import ColorInput from '../../components/ColorInput.vue'
 
 const startColorRaw = ref('#006eff')
 const endColorRaw = ref('#996699')
