@@ -27,5 +27,10 @@
     "typescript": "~5.7.2",
     "vite": "^6.3.0",
     "vue-tsc": "^2.2.8"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-tailwindcss"
+    ]
   }
 }
