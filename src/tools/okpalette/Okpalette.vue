@@ -60,7 +60,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { Plus } from "@lucide/vue";
 import ProjectToolbar from "./components/ProjectToolbar.vue";
 import GlobalSettings from "./components/GlobalSettings.vue";
@@ -75,19 +75,18 @@ import { usePaletteGeneration } from "./composables/usePaletteGeneration";
 import { useExport } from "./composables/useExport";
 
 const {
-  projects,
-  currentProject,
-  selectProject,
-  createProject,
-  deleteProject,
-  saveProject,
+    projects,
+    currentProject,
+    selectProject,
+    createProject,
+    deleteProject,
+    importProject
 } = useProjects();
 
 const { generated } = usePaletteGeneration(() => currentProject.value);
 
 const {
   copyFigmaTokens,
-  downloadFigmaTokens,
   downloadProject: exportProject,
 } = useExport();
 
@@ -107,12 +106,6 @@ function newProject() {
 
 function removeProject() {
   deleteProject(currentProject.value.id);
-}
-
-function importProject(project) {
-  projects.value.push(project);
-
-  selectProject(project.id);
 }
 
 function downloadProject() {

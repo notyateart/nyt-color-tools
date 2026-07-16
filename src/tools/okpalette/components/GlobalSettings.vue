@@ -63,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import type { PaletteProject } from "../../paletter/types";
+import type { PaletteProject } from "../types";
 
 defineProps<{
   project: PaletteProject;

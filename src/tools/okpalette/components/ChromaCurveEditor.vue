@@ -68,7 +68,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Palette } from "../../paletter/types";
+import type { Palette } from "../types";
 import { Minus, Plus } from "@lucide/vue";
 
 const props = defineProps<{

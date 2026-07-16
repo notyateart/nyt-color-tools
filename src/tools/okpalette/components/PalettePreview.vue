@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import type { GeneratedPalette } from "../../paletter/types.ts";
+import type { GeneratedPalette } from "../types";
 
 import ColorCard from "./ColorCard.vue";
 

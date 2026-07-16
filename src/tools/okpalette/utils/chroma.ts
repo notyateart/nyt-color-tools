@@ -1,4 +1,4 @@
-import type { ChromaStop, Curve } from "../../paletter/types";
+import type { ChromaStop, Curve } from "../types";
 
 export function generateLightness(top: number, bottom: number, steps: number) {
   return Array.from(
@@ -29,7 +29,7 @@ export function normalizeChromaStops(
 
   const end = {
     step: maxStep,
-    value: sorted.at(-1)?.value ?? 0,
+    value: sorted[sorted.length - 1]?.value ?? 0,
   };
 
   const middle = sorted

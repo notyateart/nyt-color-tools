@@ -29,15 +29,11 @@
 </template>
 
 <script setup lang="ts">
-import type { GeneratedColor } from "../../paletter/types";
+import type { GeneratedColor } from "../types";
 
-const props = defineProps<{
-  color: GeneratedColor;
-}>();
+const emit = defineEmits<{ copied: [value: string] }>();
 
-const emit = defineEmits<{
-  copied: [value: string];
-}>();
+defineProps<{ color: GeneratedColor }>();
 
 async function copy(value: string) {
   await navigator.clipboard.writeText(value);

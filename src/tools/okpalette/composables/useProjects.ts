@@ -1,6 +1,6 @@
 import { computed, ref, watch } from "vue";
 
-import type { Palette, PaletteProject } from "../../paletter/types";
+import type { Palette, PaletteProject } from "../types";
 
 const STORAGE_KEY = "ok-palette-projects";
 

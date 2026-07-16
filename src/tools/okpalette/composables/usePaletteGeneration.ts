@@ -3,7 +3,7 @@ import type {
   GeneratedPalette,
   GeneratedColor,
   PaletteProject,
-} from "../../paletter/types";
+} from "../types";
 
 import { generateLightness, generateChroma } from "../utils/chroma";
 

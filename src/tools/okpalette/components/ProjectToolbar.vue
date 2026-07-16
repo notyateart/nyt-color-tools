@@ -75,7 +75,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { Upload, Download, ClipboardCopy, Trash2, Save } from "@lucide/vue";
-import type { PaletteProject } from "../../paletter/types";
+import type { PaletteProject } from "../types";
 
 const props = defineProps<{
   projects: PaletteProject[];

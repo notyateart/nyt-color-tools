@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Palette } from "../../paletter/types.ts";
+import type { Palette } from "../types";
 import { Trash2 } from "@lucide/vue";
 import ChromaCurveEditor from "./ChromaCurveEditor.vue";
 

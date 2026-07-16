@@ -1,4 +1,4 @@
-import type { GeneratedPalette, PaletteProject } from "../../paletter/types";
+import type { GeneratedPalette, PaletteProject } from "../types";
 
 import { serializeFigmaTokens, stringifyJSON } from "../utils/figma";
 

@@ -1,4 +1,4 @@
-import type { GeneratedPalette } from "../../paletter/types";
+import type { GeneratedPalette } from "../types";
 
 interface FigmaColorToken {
   $extensions: {
