@@ -1,5 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import type { RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHistory } from "vue-router";
+import type { RouteRecordRaw } from "vue-router";
 
 type ToolEntry = {
   path: string;
@@ -10,11 +10,11 @@ type ToolEntry = {
 
 export const toolRoutes: ToolEntry[] = [];
 
-const modules = import.meta.glob('@/tools/**/[A-Z]*.vue', { eager: true });
+const modules = import.meta.glob("@/tools/*/[A-Z]*.vue", { eager: true });
 
 for (const [path, module] of Object.entries(modules)) {
   const match = path.match(/\/tools\/(.+?)\//);
-  const name = match?.[1] ?? 'tool';
+  const name = match?.[1] ?? "tool";
   const label = name.charAt(0).toUpperCase() + name.slice(1);
 
   toolRoutes.push({
@@ -26,7 +26,7 @@ for (const [path, module] of Object.entries(modules)) {
 }
 
 const routes: RouteRecordRaw[] = [
-  { path: '/', redirect: toolRoutes[0]?.path || '/stepforge' },
+  { path: "/", redirect: toolRoutes[0]?.path || "/home" },
   ...toolRoutes.map(({ path, name, component }) => ({
     path,
     name,

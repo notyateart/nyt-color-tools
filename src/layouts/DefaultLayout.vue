@@ -1,17 +1,23 @@
 <template>
-  <div class="min-h-screen bg-slate-100 text-slate-900 font-sans flex flex-col">
-    <nav class="bg-white shadow-md sticky top-0 z-10 px-8 text-2xl font-medium">
-      <div class="mx-auto px-6 py-4 flex items-center justify-between">
+  <div
+    class="flex min-h-screen flex-col bg-zinc-100 font-sans text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300"
+  >
+    <nav
+      class="sticky top-0 z-10 bg-white px-8 text-2xl font-medium shadow-md dark:bg-zinc-800"
+    >
+      <div class="mx-auto flex items-center justify-between px-6 py-4">
         <!-- Title (left) -->
-        <RouterLink to="/">
-          NYT Color Tools
-        </RouterLink>
+        <RouterLink to="/"> NYT Color Tools </RouterLink>
 
         <!-- Nav Items (right) -->
         <div class="flex gap-6">
-          <RouterLink v-for="tool in toolRoutes" :key="tool.path" :to="tool.path"
-            class="hover:text-blue-700 transition-all"
-            :class="{ 'text-blue-500': route.path === tool.path }">
+          <RouterLink
+            v-for="tool in toolRoutes"
+            :key="tool.path"
+            :to="tool.path"
+            class="transition-all hover:text-blue-700"
+            :class="{ 'text-blue-500': route.path === tool.path }"
+          >
             {{ tool.label }}
           </RouterLink>
         </div>
@@ -19,7 +25,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="flex-1 px-6 py-10 bg-slate-100">
+    <main class="flex-1 px-6 py-10">
       <div class="px-8">
         <RouterView />
       </div>
@@ -28,8 +34,8 @@
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import { toolRoutes } from '../router'
+import { useRoute } from "vue-router";
+import { toolRoutes } from "../router";
 
-const route = useRoute()
+const route = useRoute();
 </script>

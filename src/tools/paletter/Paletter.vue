@@ -1,11 +1,11 @@
 <template>
-  <div class="p-6 max-w-5xl mx-auto space-y-8">
+  <div class="mx-auto max-w-5xl space-y-8 p-6">
     <h2 class="text-3xl font-bold">OKLCH Palette Generator</h2>
 
-    <div class="grid md:grid-cols-3 gap-6">
+    <div class="grid gap-6 md:grid-cols-3">
       <!-- Hue Controls -->
       <div>
-        <h3 class="font-semibold mb-2">Hues (°)</h3>
+        <h3 class="mb-2 font-semibold">Hues (°)</h3>
         <div class="space-y-2">
           <div v-for="(h, i) in hues" :key="'h' + i" class="flex gap-2">
             <input
@@ -14,14 +14,14 @@
               step="5"
               min="0"
               max="360"
-              class="flex-1 p-2 border rounded"
+              class="flex-1 rounded border p-2"
               :placeholder="'Hue ' + (i + 1)"
             />
             <button @click="hues.splice(i, 1)" class="text-red-500">✕</button>
           </div>
           <button
             @click="hues.push(0)"
-            class="px-2 py-1 text-sm bg-gray-200 rounded"
+            class="rounded bg-gray-200 px-2 py-1 text-sm"
           >
             + Add Hue
           </button>
@@ -30,7 +30,7 @@
 
       <!-- Lightness Controls -->
       <div>
-        <h3 class="font-semibold mb-2">Lightness</h3>
+        <h3 class="mb-2 font-semibold">Lightness</h3>
         <div class="space-y-2">
           <div v-for="(l, i) in lightnesses" :key="'l' + i" class="flex gap-2">
             <input
@@ -39,7 +39,7 @@
               step="5"
               min="0"
               max="100"
-              class="flex-1 p-2 border rounded"
+              class="flex-1 rounded border p-2"
               :placeholder="'L ' + (i + 1)"
             />
             <button @click="lightnesses.splice(i, 1)" class="text-red-500">
@@ -48,7 +48,7 @@
           </div>
           <button
             @click="lightnesses.push(70)"
-            class="px-2 py-1 text-sm bg-gray-200 rounded"
+            class="rounded bg-gray-200 px-2 py-1 text-sm"
           >
             + Add Lightness
           </button>
@@ -57,7 +57,7 @@
 
       <!-- Chroma Controls -->
       <div>
-        <h3 class="font-semibold mb-2">Chroma</h3>
+        <h3 class="mb-2 font-semibold">Chroma</h3>
         <div class="space-y-2">
           <div v-for="(c, i) in chromas" :key="'c' + i" class="flex gap-2">
             <input
@@ -65,7 +65,7 @@
               type="number"
               step="0.01"
               min="0"
-              class="flex-1 p-2 border rounded"
+              class="flex-1 rounded border p-2"
               :placeholder="'C ' + (i + 1)"
             />
             <button @click="chromas.splice(i, 1)" class="text-red-500">
@@ -74,7 +74,7 @@
           </div>
           <button
             @click="chromas.push(0.05)"
-            class="px-2 py-1 text-sm bg-gray-200 rounded"
+            class="rounded bg-gray-200 px-2 py-1 text-sm"
           >
             + Add Chroma
           </button>
@@ -86,49 +86,53 @@
       <!-- Button -->
       <button
         @click="copyCode"
-        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
       >
         Copy Code
       </button>
     </div>
     <!-- Color Grid -->
     <div v-if="palette.length" class="grid grid-cols-6 gap-2">
-        <div
-            v-for="(color, index) in palette"
-            :key="index"
-            class="aspect-square rounded border-4 flex items-center justify-center text-xs text-center px-1"
-            :style="{
-            backgroundColor: color.clone().toGamut({ space: 'srgb' }).toString(),
-            borderColor: color.inGamut('srgb') ? 'white' : 'red',
-            }"
-        >
+      <div
+        v-for="(color, index) in palette"
+        :key="index"
+        class="flex aspect-square items-center justify-center rounded border-4 px-1 text-center text-xs"
+        :style="{
+          backgroundColor: color.clone().toGamut({ space: 'srgb' }).toString(),
+          borderColor: color.inGamut('srgb') ? 'white' : 'red',
+        }"
+      >
         <span
-            :style="{
-            color: (
-                Math.abs(color.clone().toGamut(
-                    { space: 'srgb' }
-                ).contrast(white, 'APCA')) > 
-                Math.abs(color.clone().toGamut(
-                    { space: 'srgb' }
-                ).contrast(black, 'APCA'))
-            ) ? 'white' : 'black',
-            }"
+          :style="{
+            color:
+              Math.abs(
+                color
+                  .clone()
+                  .toGamut({ space: 'srgb' })
+                  .contrast(white, 'APCA'),
+              ) >
+              Math.abs(
+                color
+                  .clone()
+                  .toGamut({ space: 'srgb' })
+                  .contrast(black, 'APCA'),
+              )
+                ? 'white'
+                : 'black',
+          }"
         >
-            {{ color.toString('oklch') }}
+          {{ color.toString("oklch") }}
         </span>
-        </div>
+      </div>
     </div>
-
-
-
   </div>
   <!-- Toast notifications -->
-  <div class="fixed bottom-4 right-4 flex flex-col items-end space-y-4 z-50">
+  <div class="fixed right-4 bottom-4 z-50 flex flex-col items-end space-y-4">
     <transition-group name="fade" tag="div">
       <div
         v-for="toast in toasts"
         :key="toast.id"
-        class="bg-gray-900 text-white px-4 py-2 rounded shadow-lg text-sm"
+        class="rounded bg-gray-900 px-4 py-2 text-sm text-white shadow-lg"
       >
         {{ toast.message }}
       </div>
@@ -185,7 +189,6 @@ function showToast(message, duration = 3000) {
     toasts.value = toasts.value.filter((toast) => toast.id !== id);
   }, duration);
 }
-
 
 // Copy colors to clipboard
 async function copyCode() {
