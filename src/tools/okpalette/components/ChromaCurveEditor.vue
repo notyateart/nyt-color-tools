@@ -27,7 +27,7 @@
         </span>
 
         <div class="col-span-2 space-y-1">
-          <label class="text-sm"> Step {{ stop.step }} </label>
+          <label class="text-sm"> Step {{ stop.step + 1 }} </label>
 
           <input
             v-model.number="stop.step"

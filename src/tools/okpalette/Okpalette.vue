@@ -2,19 +2,20 @@
   <section class="space-y-8">
     <header>
       <h2 class="text-3xl font-bold">OK Palette</h2>
-      <p class="mt-4 mb-2">
-        Generate OKLCH design system palettes
-        <ul class="ml-8 list-decimal text-zinc-500 dark:text-zinc-400">
-          <li>Add colors using the "new color range" button.</li>
-          <li>Set a hue from 0 to 360 degrees.</li>
-          <li>Change start, end and if needed middle point chroma values.</li>
-          <li>Results are auto-saved. Download or copy to Figma once finished.</li>
-        </ul>
-      </p>
+      <p class="mt-4 mb-2">Generate OKLCH design system palettes</p>
+      <ul class="ml-8 list-decimal text-zinc-500 dark:text-zinc-400">
+        <li>Add colors using the "new color range" button.</li>
+        <li>Set a hue from 0 to 360 degrees.</li>
+        <li>Change start, end and if needed middle point chroma values.</li>
+        <li>Results are auto-saved. Download or copy to Figma once finished.</li>
+      </ul>
     </header>
 
-
-    <h3 class="text-xl font-bold w-full border-b border-zinc-300 p-4 dark:border-zinc-700">1. Settings</h3>
+    <h3
+      class="w-full border-b border-zinc-300 p-4 text-xl font-bold dark:border-zinc-700"
+    >
+      1. Settings
+    </h3>
 
     <div class="flex gap-4">
       <ProjectToolbar
@@ -32,7 +33,11 @@
     </div>
 
     <div class="h-4"></div>
-    <h3 class="text-xl font-bold w-full border-b border-zinc-300 p-4 dark:border-zinc-700">2. Colors</h3>
+    <h3
+      class="w-full border-b border-zinc-300 p-4 text-xl font-bold dark:border-zinc-700"
+    >
+      2. Colors
+    </h3>
 
     <div class="flex flex-wrap gap-4">
       <PaletteEditor
@@ -51,7 +56,11 @@
     </button>
 
     <div class="h-4"></div>
-    <h3 class="text-xl font-bold w-full border-b border-zinc-300 p-4 dark:border-zinc-700">3. Output</h3>
+    <h3
+      class="w-full border-b border-zinc-300 p-4 text-xl font-bold dark:border-zinc-700"
+    >
+      3. Output
+    </h3>
 
     <PalettePreview :palettes="generated" @copied="showToast" />
 
@@ -60,7 +69,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { Plus } from "@lucide/vue";
 import ProjectToolbar from "./components/ProjectToolbar.vue";
 import GlobalSettings from "./components/GlobalSettings.vue";
@@ -75,20 +84,17 @@ import { usePaletteGeneration } from "./composables/usePaletteGeneration";
 import { useExport } from "./composables/useExport";
 
 const {
-    projects,
-    currentProject,
-    selectProject,
-    createProject,
-    deleteProject,
-    importProject
+  projects,
+  currentProject,
+  selectProject,
+  createProject,
+  deleteProject,
+  importProject,
 } = useProjects();
 
 const { generated } = usePaletteGeneration(() => currentProject.value);
 
-const {
-  copyFigmaTokens,
-  downloadProject: exportProject,
-} = useExport();
+const { copyFigmaTokens, downloadProject: exportProject } = useExport();
 
 const toast = ref("");
 
@@ -148,4 +154,28 @@ function removePalette(id: string) {
     (p) => p.id !== id,
   );
 }
+
+watch(
+  () => currentProject.value.steps,
+  (newSteps, oldSteps) => {
+    if (!oldSteps || newSteps === oldSteps) return;
+
+    currentProject.value.palettes.forEach((palette) => {
+      palette.chromaStops = palette.chromaStops.map((stop, index, array) => {
+        if (index === 0) {
+          return { ...stop, step: 0 };
+        }
+
+        if (index === array.length - 1) {
+          return { ...stop, step: newSteps - 1 };
+        }
+
+        return {
+          ...stop,
+          step: Math.round((stop.step * (newSteps - 1)) / (oldSteps - 1)),
+        };
+      });
+    });
+  },
+);
 </script>
