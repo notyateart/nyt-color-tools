@@ -1,22 +1,34 @@
 <template>
-  <div class="w-fill space-y-4">
-    <label class="text-sm"> Chroma </label>
-    <select
-      v-model="palette.curve"
-      class="w-full rounded border border-zinc-300 px-4 py-2 dark:border-zinc-700"
-    >
-      <option value="linear">Linear</option>
+  <div class="space-y-2">
+    <div class="flex items-end gap-3">
+      <div class="flex-1">
+        <label class="label">Chroma curve</label>
+        <select v-model="palette.curve" class="select select w-full">
+          <option value="linear">Linear</option>
+          <option value="ease">Ease</option>
+        </select>
+      </div>
 
-      <option value="ease">Ease</option>
-    </select>
+      <button
+        type="button"
+        class="btn btn-ghost btn"
+        :disabled="availableSteps.length === 0"
+        :title="
+          availableSteps.length === 0 ? 'Every step already has a point' : ''
+        "
+        @click="addStop"
+      >
+        <Plus :size="16" /> Add point
+      </button>
+    </div>
 
-    <div class="flex flex-col gap-4">
+    <div class="flex flex-col">
       <div
         v-for="(stop, index) in palette.chromaStops"
-        :key="index"
-        class="grid grid-cols-6 grid-rows-1 items-center gap-2 rounded border border-zinc-300 px-4 py-2 dark:border-zinc-700"
+        :key="stop.id"
+        class="border-base-300 grid grid-cols-12 items-center gap-2 border-b py-2 last:border-b-0 w-fill"
       >
-        <span class="col-span-1">
+        <span class="text-xs col-span-2">
           {{
             index === 0
               ? "Start"
@@ -26,16 +38,19 @@
           }}
         </span>
 
-        <div class="col-span-2 space-y-1">
-          <label class="text-sm"> Step {{ stop.step + 1 }} </label>
+        <div class="space-y-1 col-span-6">
+          <label class="label py-0 text-xs"> Step {{ stop.step + 1 }} </label>
 
           <input
             v-model.number="stop.step"
             type="range"
-            min="1"
-            :max="steps - 2"
+            :min="stepMin(index)"
+            :max="stepMax(index)"
             :disabled="index === 0 || index === palette.chromaStops.length - 1"
-            class="w-full"
+            class="range range-primary range-xs w-full"
+            :aria-label="`Chroma point ${index + 1} step`"
+            @change="normalizeStop(index)"
+            @blur="normalizeStop(index)"
           />
         </div>
 
@@ -44,30 +59,29 @@
           type="number"
           step="0.0025"
           min="0"
-          max="0.2"
-          class="col-span-2 rounded border border-zinc-300 px-4 py-2 dark:border-zinc-700"
+          max="0.4"
+          aria-label="Chroma value"
+          class="input w-full  col-span-3"
+          @change="normalizeStop(index)"
+          @blur="normalizeStop(index)"
         />
 
         <button
           v-if="index !== 0 && index !== palette.chromaStops.length - 1"
-          class="col-span-1 flex justify-center gap-2 rounded border border-red-500 py-2 pr-4 pl-2 font-medium text-red-500"
+          type="button"
+          aria-label="Remove chroma point"
+          class="btn btn-error btn-ghost btn-square btn"
           @click="removeStop(index)"
         >
-          <Minus :size="24"></Minus>Remove
+          <Minus :size="18" />
         </button>
       </div>
     </div>
-
-    <button
-      class="flex cursor-pointer justify-center gap-2 rounded bg-zinc-300 py-2 pr-4 pl-2 font-medium dark:bg-zinc-700"
-      @click="addStop"
-    >
-      <Plus :size="24"></Plus> New point
-    </button>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import type { Palette } from "../types";
 import { Minus, Plus } from "@lucide/vue";
 
@@ -76,22 +90,55 @@ const props = defineProps<{
   steps: number;
 }>();
 
+const availableSteps = computed(() => {
+  const used = new Set(props.palette.chromaStops.map((stop) => stop.step));
+  return Array.from(
+    { length: Math.max(0, props.steps - 2) },
+    (_, index) => index + 1,
+  ).filter((step) => !used.has(step));
+});
+
 function addStop() {
-  const middle = Math.floor(props.steps / 2);
+  const middle = (props.steps - 1) / 2;
+  const step = [...availableSteps.value].sort(
+    (a, b) => Math.abs(a - middle) - Math.abs(b - middle),
+  )[0];
 
-  props.palette.chromaStops.splice(
-    props.palette.chromaStops.length - 1,
-
-    0,
-
-    {
-      step: middle,
-      value: 0.12,
-    },
-  );
+  if (step === undefined) return;
+  props.palette.chromaStops.push({
+    id: crypto.randomUUID(),
+    step,
+    value: 0.12,
+  });
+  props.palette.chromaStops.sort((a, b) => a.step - b.step);
 }
 
 function removeStop(index: number) {
   props.palette.chromaStops.splice(index, 1);
+}
+
+function stepMin(index: number) {
+  if (index === 0) return 0;
+  return props.palette.chromaStops[index - 1].step + 1;
+}
+
+function stepMax(index: number) {
+  if (index === props.palette.chromaStops.length - 1) return props.steps - 1;
+  return props.palette.chromaStops[index + 1].step - 1;
+}
+
+function normalizeStop(index: number) {
+  const stop = props.palette.chromaStops[index];
+  stop.value = clamp(Number(stop.value) || 0, 0, 0.4);
+
+  if (index > 0 && index < props.palette.chromaStops.length - 1) {
+    stop.step = Math.round(
+      clamp(Number(stop.step), stepMin(index), stepMax(index)),
+    );
+  }
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
 }
 </script>

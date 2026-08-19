@@ -1,38 +1,36 @@
 <template>
-  <div class="space-y-8">
-    <section v-for="palette in palettes" :key="palette.id" class="space-y-3">
-      <header class="flex items-center justify-between">
-        <h3 class="text-lg font-bold">
-          {{ palette.name }}
-        </h3>
-
-        <span class="text-sm text-gray-500"> Hue {{ palette.hue }}° </span>
-      </header>
-
-      <div
-        class="grid grid-cols-2 gap-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-10"
-      >
-        <ColorCard
-          v-for="color in palette.colors"
-          :key="color.oklch"
-          :color="color"
-          @copied="emit('copied', $event)"
-        />
-      </div>
-    </section>
+  <div
+    v-if="palette"
+    class="grid grid-cols-[repeat(auto-fit,minmax(105px,1fr))] gap-2"
+  >
+    <ColorSwatch
+      v-for="color in palette.colors"
+      :key="color.oklch"
+      :color="color.oklch"
+      :text-color="color.text"
+      :border-color="color.border"
+      :primary-value="color.oklch"
+      :secondary-value="color.hex"
+      :meta="`APCA ${Math.round(color.apca)}`"
+      :invalid="color.outOfGamut"
+      compact
+      @copied="emit('copied', $event)"
+      @copy-error="emit('copy-error', $event)"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { GeneratedPalette } from "../types";
 
-import ColorCard from "./ColorCard.vue";
+import ColorSwatch from "../../../components/ColorSwatch.vue";
 
 defineProps<{
-  palettes: GeneratedPalette[];
+  palette?: GeneratedPalette;
 }>();
 
 const emit = defineEmits<{
   copied: [value: string];
+  "copy-error": [message: string];
 }>();
 </script>

@@ -9,9 +9,14 @@ export interface ContrastResult {
  * Converts any CSS color (OKLCH, HEX, RGB...) to HEX.
  */
 export function toHex(color: string): string {
-  return new Color(color).to("srgb").toString({
-    format: "hex",
-  });
+  return new Color(color)
+    .to("srgb")
+    .toGamut({ space: "srgb" })
+    .toString({ format: "hex", collapse: false });
+}
+
+export function isInSrgbGamut(color: string) {
+  return new Color(color).inGamut("srgb");
 }
 
 /**
@@ -19,7 +24,7 @@ export function toHex(color: string): string {
  * and returns the better text color.
  */
 export function getContrast(color: string): ContrastResult {
-  const background = new Color(color);
+  const background = new Color(color).to("srgb").toGamut({ space: "srgb" });
 
   const black = Math.abs(background.contrast("black", "APCA"));
 
@@ -30,39 +35,6 @@ export function getContrast(color: string): ContrastResult {
 
     apca: Math.max(black, white),
   };
-}
-
-/**
- * Convenience wrapper.
- */
-export function getTextColor(color: string): string {
-  return getContrast(color).text;
-}
-
-/**
- * Convenience wrapper.
- */
-export function getAPCA(color: string): number {
-  return getContrast(color).apca;
-}
-
-/**
- * Small badge used in the UI.
- */
-export function getAPCARating(apca: number): string {
-  if (apca >= 90) {
-    return "Excellent";
-  }
-
-  if (apca >= 75) {
-    return "Good";
-  }
-
-  if (apca >= 60) {
-    return "Fair";
-  }
-
-  return "Poor";
 }
 
 export function getBorderColor(color: string): string {

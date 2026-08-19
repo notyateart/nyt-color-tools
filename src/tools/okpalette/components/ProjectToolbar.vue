@@ -1,17 +1,10 @@
 <template>
-  <fieldset
-    class="flex w-150 flex-col gap-4 rounded border border-zinc-300 p-4 dark:border-zinc-700"
-  >
-    <legend class="px-2 font-semibold text-zinc-500 dark:text-zinc-300">
-      Palette management
-    </legend>
+  <section class="space-y-4">
+    <h2 class="text-base font-semibold">Project</h2>
 
-    <div class="grid grid-cols-3 grid-rows-3 gap-4">
-      <select
-        v-model="selectedId"
-        class="col-span-2 rounded border border-zinc-300 px-4 py-2 dark:border-zinc-700"
-        @change="changeProject"
-      >
+    <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2">
+      <label :for="projectSelectId" class="sr-only">Active project</label>
+      <select :id="projectSelectId" v-model="selectedId" class="select w-full">
         <option
           v-for="project in projects"
           :key="project.id"
@@ -22,59 +15,58 @@
       </select>
 
       <button
-        class="col-span-1 flex justify-center gap-2 rounded bg-red-500 py-2 pr-4 pl-2 font-medium text-white"
+        type="button"
+        class="btn btn-error btn-outline"
+        :disabled="projects.length <= 1"
         @click="emit('remove')"
       >
-        <Trash2 :size="24" /> Delete set
+        <Trash2 :size="18" /> Delete
       </button>
 
       <input
+        :id="projectNameId"
         v-model="project.name"
-        class="col-span-2 rounded border border-zinc-300 px-4 py-2 dark:border-zinc-700"
+        aria-label="Project name"
+        class="input w-full"
       />
 
-      <button
-        class="col-span-1 flex justify-center gap-2 rounded bg-blue-500 py-2 pr-4 pl-2 font-medium text-white"
-        @click="emit('new')"
-      >
-        <Save :size="24" /> Save set
+      <button type="button" class="btn btn-primary" @click="emit('new')">
+        <Plus :size="18" /> New project
       </button>
+    </div>
 
+    <div class="grid grid-cols-3 gap-2 pt-1">
       <label
-        class="col-span-1 flex cursor-pointer justify-center gap-2 rounded bg-zinc-300 py-2 pr-4 pl-2 font-medium dark:bg-zinc-700"
+        class="btn btn-soft cursor-pointer"
+        aria-label="Import project JSON"
       >
-        <Upload :size="24" /> Upload JSON
+        <Upload :size="18" /> Import
         <input type="file" accept=".json" class="hidden" @change="importFile" />
       </label>
 
       <button
-        class="col-span-1 flex cursor-pointer justify-center gap-2 rounded bg-zinc-300 py-2 pr-4 pl-2 font-medium dark:bg-zinc-700"
+        type="button"
+        class="btn btn-soft"
         @click="emit('download')"
       >
-        <Download :size="24" /> Download JSON
+        <Download :size="18" /> Export
       </button>
 
       <button
-        class="col-span-1 flex cursor-pointer justify-center gap-2 rounded bg-zinc-300 py-2 pr-4 pl-2 font-medium dark:bg-zinc-700"
+        type="button"
+        class="btn btn-soft"
+        title="Copy Figma-compatible design tokens"
         @click="emit('figma')"
       >
-        <ClipboardCopy :size="24" /> Copy tokens
+        <ClipboardCopy :size="18" /> Tokens
       </button>
     </div>
-    <p>
-      Install
-      <a
-        class="underline hover:text-blue-500"
-        href="https://www.figma.com/community/plugin/843461159747178978/Figma-Tokens"
-        >Figma Tokens</a
-      >, run the plugin and open JSON tab, copy tokens and paste there.
-    </p>
-  </fieldset>
+  </section>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { Upload, Download, ClipboardCopy, Trash2, Save } from "@lucide/vue";
+import { computed, useId } from "vue";
+import { Upload, Download, ClipboardCopy, Trash2, Plus } from "@lucide/vue";
 import type { PaletteProject } from "../types";
 
 const props = defineProps<{
@@ -92,16 +84,21 @@ const emit = defineEmits<{
 
   import: [project: PaletteProject];
 
+  importError: [message: string];
+
   download: [];
 
   figma: [];
 }>();
 
-const selectedId = ref(props.project.id);
+const selectedId = computed({
+  get: () => props.project.id,
+  set: (id: string) => emit("select", id),
+});
 
-function changeProject() {
-  emit("select", selectedId.value);
-}
+const id = useId();
+const projectSelectId = `${id}-project`;
+const projectNameId = `${id}-project-name`;
 
 async function importFile(event: Event) {
   const input = event.target as HTMLInputElement;
@@ -110,12 +107,15 @@ async function importFile(event: Event) {
 
   if (!file) return;
 
-  const text = await file.text();
+  try {
+    const text = await file.text();
+    const project = JSON.parse(text) as PaletteProject;
 
-  const project = JSON.parse(text) as PaletteProject;
-
-  emit("import", project);
-
-  input.value = "";
+    emit("import", project);
+  } catch {
+    emit("importError", "Could not import that project file");
+  } finally {
+    input.value = "";
+  }
 }
 </script>

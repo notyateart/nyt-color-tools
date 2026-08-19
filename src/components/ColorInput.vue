@@ -1,72 +1,123 @@
 <template>
-  <div class="flex flex-col gap-4">
-    <label class="text-sm font-medium">{{ label }}</label>
+  <fieldset class="fieldset bg-base-100 border-base-300 rounded-box border p-5">
+    <legend class="fieldset-legend px-1">{{ label }}</legend>
 
-    <!-- Hex picker and preview -->
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-3">
+      <label :for="pickerId" class="sr-only">{{ label }} color picker</label>
       <input
+        :id="pickerId"
         type="color"
-        v-model="hexInput"
-        class="h-10 w-10 shrink-0 rounded border"
-        :title="outOfGamut ? 'Fallback preview (outside sRGB)' : ''"
+        :value="pickerHex"
+        class="h-11 w-11 shrink-0 cursor-pointer rounded-lg border-0 bg-transparent p-0"
+        @input="updateFromPicker"
       />
-      <input
-        v-model="hexInput"
-        type="text"
-        class="flex-1 rounded border px-3 py-2 font-mono text-sm"
-      />
+
+      <div class="min-w-0 flex-1">
+        <label :for="hexId" class="sr-only">{{ label }} HEX value</label>
+        <input
+          :id="hexId"
+          v-model.trim="hexInput"
+          type="text"
+          inputmode="text"
+          autocomplete="off"
+          spellcheck="false"
+          class="input w-full font-mono"
+          :class="{ 'input-error': invalidInput }"
+          :aria-invalid="invalidInput"
+          :aria-describedby="messageId"
+          @blur="restoreInvalidInput"
+        />
+      </div>
     </div>
 
-    <!-- OKLCH sliders + inputs -->
-    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+    <p v-if="invalidInput" :id="messageId" class="text-error mt-1 text-xs">
+      Enter a valid CSS color, such as #006eff.
+    </p>
+    <p v-else-if="outOfGamut" :id="messageId" class="text-warning mt-1 text-xs">
+      This OKLCH color is outside sRGB. The HEX preview is gamut-mapped.
+    </p>
+    <span v-else :id="messageId" class="sr-only">Valid color</span>
+
+    <div class="mt-1 grid grid-cols-1 gap-4 sm:grid-cols-3">
       <div>
-        <label class="text-xs text-gray-500">Lightness (L)</label>
-        <input type="range" min="0" max="100" step="1" v-model.number="l" />
+        <label :for="lightnessRangeId" class="label text-xs">
+          Lightness (L)
+        </label>
         <input
+          :id="lightnessRangeId"
+          v-model.number="lightness"
+          class="range range-xs range-primary"
+          type="range"
+          min="0"
+          max="100"
+          step="1"
+        />
+        <input
+          v-model.number="lightness"
           type="number"
           min="0"
           max="100"
           step="1"
-          v-model.number="l"
-          class="w-full rounded border px-2 py-1 font-mono text-sm"
+          :aria-label="`${label} lightness value`"
+          class="input mt-1 w-full font-mono"
+          @change="normalizeChannels"
+          @blur="normalizeChannels"
         />
       </div>
+
       <div>
-        <label class="text-xs text-gray-500">Chroma (C)</label>
+        <label :for="chromaRangeId" class="label text-xs">Chroma (C)</label>
         <input
+          :id="chromaRangeId"
+          v-model.number="chroma"
           type="range"
           min="0"
-          max="0.37"
+          max="0.4"
           step="0.005"
-          v-model.number="c"
+          class="range range-xs range-primary"
         />
         <input
+          v-model.number="chroma"
           type="number"
           min="0"
-          max="0.37"
+          max="0.4"
           step="0.005"
-          v-model.number="c"
-          class="w-full rounded border px-2 py-1 font-mono text-sm"
+          :aria-label="`${label} chroma value`"
+          class="input mt-1 w-full font-mono"
+          @change="normalizeChannels"
+          @blur="normalizeChannels"
         />
       </div>
+
       <div>
-        <label class="text-xs text-gray-500">Hue (H)</label>
-        <input type="range" min="0" max="360" step="1" v-model.number="h" />
+        <label :for="hueRangeId" class="label text-xs">Hue (H)</label>
         <input
+          :id="hueRangeId"
+          v-model.number="hue"
+          class="range range-xs range-primary"
+          type="range"
+          min="0"
+          max="360"
+          step="1"
+        />
+        <input
+          v-model.number="hue"
           type="number"
           min="0"
           max="360"
           step="1"
-          v-model.number="h"
-          class="w-full rounded border px-2 py-1 font-mono text-sm"
+          :aria-label="`${label} hue value`"
+          class="input mt-1 w-full font-mono"
+          @change="normalizeChannels"
+          @blur="normalizeChannels"
         />
       </div>
     </div>
-  </div>
+  </fieldset>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted } from "vue";
+import { computed, onMounted, ref, useId, watch } from "vue";
 import Color from "colorjs.io";
 
 const props = defineProps<{
@@ -75,60 +126,130 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: "update:modelValue", value: string): void;
-  (e: "oklch", value: { l: number; c: number; h: number }): void;
+  (event: "update:modelValue", value: string): void;
+  (event: "oklch", value: { l: number; c: number; h: number }): void;
 }>();
 
+const id = useId();
+const pickerId = `${id}-picker`;
+const hexId = `${id}-hex`;
+const messageId = `${id}-message`;
+const lightnessRangeId = `${id}-lightness-range`;
+const chromaRangeId = `${id}-chroma-range`;
+const hueRangeId = `${id}-hue-range`;
+
 const hexInput = ref(props.modelValue);
-const l = ref(50);
-const c = ref(0.1);
-const h = ref(0);
-const fallbackHex = ref("#808080");
+const lightness = ref<number | string>(50);
+const chroma = ref<number | string>(0.1);
+const hue = ref<number | string>(0);
 const outOfGamut = ref(false);
+const invalidInput = ref(false);
+let syncing = false;
+
+const pickerHex = computed(() => {
+  try {
+    return new Color(hexInput.value)
+      .to("srgb")
+      .toGamut({ space: "srgb" })
+      .toString({ format: "hex", collapse: false });
+  } catch {
+    return "#000000";
+  }
+});
 
 function updateHexFromOklch() {
+  const l = toFiniteNumber(lightness.value);
+  const c = toFiniteNumber(chroma.value);
+  const h = toFiniteNumber(hue.value);
+
+  if (l === null || c === null || h === null || syncing) return;
+
   try {
-    const color = new Color(`oklch(${l.value / 100} ${c.value} ${h.value})`);
+    const color = new Color(`oklch(${l / 100} ${c} ${h})`);
     const srgb = color.to("srgb");
-    fallbackHex.value = srgb.toString({ format: "hex" });
+    const hex = srgb
+      .clone()
+      .toGamut({ space: "srgb" })
+      .toString({ format: "hex", collapse: false });
+
     outOfGamut.value = !srgb.inGamut();
+    invalidInput.value = false;
+    syncing = true;
+    hexInput.value = hex;
+    syncing = false;
 
-    emit("update:modelValue", fallbackHex.value);
-    emit("oklch", { l: l.value, c: c.value, h: h.value });
+    emit("update:modelValue", hex);
+    emit("oklch", { l, c, h });
   } catch {
-    fallbackHex.value = "#000000";
-    outOfGamut.value = true;
+    invalidInput.value = true;
   }
 }
 
-function updateOklchFromHex(newHex: string) {
+function updateOklchFromColor(value: string) {
+  if (syncing) return;
+
   try {
-    const color = new Color(newHex);
-    const o = color.oklch;
-    l.value = +(o.l * 100).toFixed(2);
-    c.value = +o.c.toFixed(4);
-    h.value = +(o.h ?? 0).toFixed(2);
-    fallbackHex.value = newHex;
+    const color = new Color(value);
+    const oklch = color.to("oklch").oklch;
+
+    syncing = true;
+    lightness.value = +(oklch.l * 100).toFixed(2);
+    chroma.value = +oklch.c.toFixed(4);
+    hue.value = +(oklch.h ?? 0).toFixed(2);
+    syncing = false;
+
+    invalidInput.value = false;
     outOfGamut.value = false;
-    emit("oklch", { l: l.value, c: c.value, h: h.value });
+    emit("update:modelValue", value);
+    emit("oklch", {
+      l: Number(lightness.value),
+      c: Number(chroma.value),
+      h: Number(hue.value),
+    });
   } catch {
-    // Do nothing on invalid hex
+    invalidInput.value = true;
   }
 }
 
-// Sync: hex → oklch (all 3 sliders update together)
-watch(hexInput, (val) => {
-  updateOklchFromHex(val);
-});
+function updateFromPicker(event: Event) {
+  hexInput.value = (event.target as HTMLInputElement).value;
+}
 
-// Sync: oklch sliders → hex (hex updates, but oklch remains stable)
-watch([l, c, h], () => {
-  updateHexFromOklch();
-});
-
-// Init
-onMounted(() => {
+function restoreInvalidInput() {
+  if (!invalidInput.value) return;
+  invalidInput.value = false;
   hexInput.value = props.modelValue;
-  updateOklchFromHex(hexInput.value);
-});
+}
+
+function normalizeChannels() {
+  syncing = true;
+  lightness.value = clamp(Number(lightness.value) || 0, 0, 100);
+  chroma.value = clamp(Number(chroma.value) || 0, 0, 0.4);
+  hue.value = clamp(Number(hue.value) || 0, 0, 360);
+  syncing = false;
+  updateHexFromOklch();
+}
+
+function toFiniteNumber(value: number | string) {
+  if (value === "") return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+watch(hexInput, updateOklchFromColor, { flush: "sync" });
+
+watch(
+  () => props.modelValue,
+  (value) => {
+    if (value !== hexInput.value) hexInput.value = value;
+  },
+);
+
+watch([lightness, chroma, hue], updateHexFromOklch, { flush: "sync" });
+
+onMounted(() => updateOklchFromColor(hexInput.value));
 </script>

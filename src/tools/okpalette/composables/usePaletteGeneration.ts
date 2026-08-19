@@ -7,20 +7,36 @@ import type {
 
 import { generateLightness, generateChroma } from "../utils/chroma";
 
-import { getContrast, toHex, getBorderColor } from "../utils/contrast";
+import {
+  getContrast,
+  getBorderColor,
+  isInSrgbGamut,
+  toHex,
+} from "../utils/contrast";
 
 export function usePaletteGeneration(
   project: () => PaletteProject | undefined,
 ) {
+  const stepCount = computed(() => {
+    const value = Number(project()?.steps);
+    return Number.isFinite(value)
+      ? Math.min(Math.max(Math.round(value), 2), 30)
+      : 12;
+  });
+
   const lightness = computed(() => {
-    if (!project()) {
+    const current = project();
+
+    if (!current) {
       return [];
     }
 
     return generateLightness(
-      project()!.lightnessTop,
-      project()!.lightnessBottom,
-      project()!.steps,
+      current.lightnessTop,
+      current.lightnessBottom,
+      stepCount.value,
+      current.lightnessCurve,
+      current.lightnessCurveFactor,
     );
   });
 
@@ -33,15 +49,23 @@ export function usePaletteGeneration(
 
     return current.palettes.map((palette) => {
       const chroma = generateChroma(
-        current.steps,
+        stepCount.value,
         palette.chromaStops,
         palette.curve,
       );
 
       const colors = lightness.value.map((l, index): GeneratedColor => {
         const c = chroma[index] * current.chromaMultiplier;
+        const hue =
+          palette.endHue === null
+            ? palette.hue
+            : interpolateHue(
+                palette.hue,
+                palette.endHue,
+                index / (stepCount.value - 1),
+              );
 
-        const css = `oklch(${l.toFixed(1)}% ${c.toFixed(3)} ${palette.hue})`;
+        const css = `oklch(${l.toFixed(1)}% ${c.toFixed(3)} ${hue.toFixed(1)})`;
 
         const contrast = getContrast(css);
 
@@ -55,6 +79,8 @@ export function usePaletteGeneration(
           border: getBorderColor(css),
 
           apca: contrast.apca,
+
+          outOfGamut: !isInSrgbGamut(css),
         };
       });
 
@@ -71,4 +97,10 @@ export function usePaletteGeneration(
 
     generated,
   };
+}
+
+function interpolateHue(start: number, end: number, progress: number) {
+  const delta = ((end - start + 540) % 360) - 180;
+
+  return (start + delta * progress + 360) % 360;
 }

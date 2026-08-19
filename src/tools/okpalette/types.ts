@@ -1,6 +1,10 @@
 export type Curve = "linear" | "ease";
 
+export type LightnessCurve = "linear" | "smooth";
+
 export interface ChromaStop {
+  id?: string;
+
   step: number;
 
   value: number;
@@ -12,6 +16,8 @@ export interface Palette {
   name: string;
 
   hue: number;
+
+  endHue: number | null;
 
   chromaStops: ChromaStop[];
 
@@ -29,6 +35,10 @@ export interface PaletteProject {
 
   steps: number;
 
+  lightnessCurve: LightnessCurve;
+
+  lightnessCurveFactor: number;
+
   chromaMultiplier: number;
 
   palettes: Palette[];
@@ -44,6 +54,8 @@ export interface GeneratedColor {
   border: string;
 
   apca: number;
+
+  outOfGamut: boolean;
 }
 
 export interface GeneratedPalette extends Palette {
